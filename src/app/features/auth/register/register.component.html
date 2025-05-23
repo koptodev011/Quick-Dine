@@ -1,0 +1,51 @@
+<div class="container vh-100 d-flex align-items-center justify-content-center">
+  <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px">
+    <h6 class="text-center mb-1">Quick dine</h6>
+    <h2 class="text-center mb-4">Register</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label>Name</label>
+        <input type="text" class="form-control" formControlName="name" />
+        <div *ngIf="submitted && f['name'].errors" class="text-danger">
+          Name is required
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" formControlName="email" />
+        <div *ngIf="submitted && f['email'].errors" class="text-danger">
+          <div *ngIf="f['email'].errors['required']">Email is required</div>
+          <div *ngIf="f['email'].errors['email']">Invalid email</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>Phone</label>
+        <input type="text" class="form-control" formControlName="phone" />
+        <div *ngIf="submitted && f['phone'].errors" class="text-danger">
+          Phone is required
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>Password</label>
+        <input
+          type="password"
+          class="form-control"
+          formControlName="password"
+        />
+        <div *ngIf="submitted && f['password'].errors" class="text-danger">
+          Password is required
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Register</button>
+    </form>
+
+    <div *ngIf="errorMessage" class="text-danger text-center mt-2">
+      {{ errorMessage }}
+    </div>
+  </div>
+</div>
