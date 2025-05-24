@@ -1,12 +1,13 @@
-import { CommonModule } from "@angular/common";
-import { Component, computed, effect, signal } from "@angular/core";
+import { Component } from '@angular/core';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { RouterOutlet } from "@angular/router";
 
 @Component({
-  selector: "app-root",
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterOutlet],
+  selector: 'app-root',
+  standalone: true,
+  imports: [ CommonModule, FormsModule, ReactiveFormsModule, RouterOutlet],
   templateUrl: "./app.component.html",
-  styleUrl: "./app.component.css",
+  styleUrls: ["./app.component.css"],
 })
 export class AppComponent {}
