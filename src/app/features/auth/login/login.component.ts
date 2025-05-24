@@ -11,7 +11,7 @@ import {
   HttpErrorResponse,
 } from "@angular/common/http";
 import { CommonModule } from "@angular/common";
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 
 @Component({
   selector: "app-login",
@@ -24,7 +24,11 @@ export class LoginComponent {
   submitted = false;
   errorMessage = "";
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       email: ["", [Validators.required, Validators.email]],
       password: ["", Validators.required],
@@ -49,6 +53,7 @@ export class LoginComponent {
         next: (res) => {
           console.log("Login successful:", res);
           localStorage.setItem("token", res.token);
+          this.router.navigate(["/home"]);
           alert("Login successful!");
         },
         error: (err: HttpErrorResponse) => {
