@@ -1,0 +1,184 @@
+<div class="container-fluid py-4">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="mb-0">{{showAddForm ? 'Add New User' : 'Users Management'}}</h1>
+      <p class="text-muted">{{showAddForm ? 'Create a new restaurant administrator' : 'Manage restaurant administrators'}}</p>
+    </div>
+    <button class="btn btn-primary" (click)="showAddForm = true" *ngIf="!showAddForm">
+      <i class="bi bi-plus-lg me-2"></i>Add New User
+    </button>
+  </div>
+
+  <!-- Add User Form -->
+  <div class="card border-0 shadow-sm mb-4" *ngIf="showAddForm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">User Details</h5>
+      <button class="btn btn-outline-secondary btn-sm" (click)="showAddForm = false">
+        <i class="bi bi-arrow-left me-2"></i>Back to List
+      </button>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <!-- Profile Photo Upload -->
+        <div class="mb-4 text-center">
+          <div class="position-relative d-inline-block">
+            <div class="avatar-preview rounded-circle border" 
+                 [style.background-image]="previewUrl ? 'url(' + previewUrl + ')' : 'none'"
+                 [style.background-size]="'cover'"
+                 style="width: 150px; height: 150px; background-color: #f8f9fa;">
+              <div *ngIf="!previewUrl" class="d-flex align-items-center justify-content-center h-100">
+                <i class="bi bi-person text-muted" style="font-size: 3rem;"></i>
+              </div>
+            </div>
+            <label class="btn btn-sm btn-primary position-absolute bottom-0 end-0 me-2 mb-2">
+              <i class="bi bi-camera-fill"></i>
+              <input type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)" formControlName="profilePhoto">
+            </label>
+          </div>
+          <small class="d-block text-muted mt-2">Click the camera icon to upload profile photo</small>
+        </div>
+
+        <!-- Name Field -->
+        <div class="mb-3">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-control" formControlName="name" placeholder="Enter full name">
+          <div class="text-danger" *ngIf="userForm.get('name')?.touched && userForm.get('name')?.invalid">
+            Name is required
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" formControlName="email" placeholder="Enter email">
+            <div class="text-danger small" *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid">
+              Enter a valid email
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" formControlName="password" placeholder="Enter password">
+            <div class="text-danger" *ngIf="userForm.get('password')?.touched && userForm.get('password')?.invalid">
+              <span *ngIf="userForm.get('password')?.errors?.['required']">Password is required</span>
+              <span *ngIf="userForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" formControlName="confirmPassword" placeholder="Confirm your password">
+            <div class="text-danger" *ngIf="userForm.get('confirmPassword')?.touched && (userForm.get('confirmPassword')?.invalid || userForm.errors?.['passwordMismatch'])">
+              <span *ngIf="userForm.get('confirmPassword')?.errors?.['required']">Please confirm your password</span>
+              <span *ngIf="userForm.errors?.['passwordMismatch']">Passwords do not match</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Restaurant Name</label>
+            <input type="text" class="form-control" formControlName="restaurant" placeholder="Enter restaurant name">
+            <div class="text-danger small" *ngIf="userForm.get('restaurant')?.touched && userForm.get('restaurant')?.invalid">
+              Restaurant name is required
+            </div>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary me-2" [disabled]="userForm.invalid">Create User</button>
+            <button type="button" class="btn btn-outline-secondary" (click)="showAddForm = false">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card border-0 shadow-sm" *ngIf="!showAddForm">
+    <div class="card-body">
+      <!-- Search and Filter -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="bi bi-search"></i>
+            </span>
+            <input 
+              type="text" 
+              class="form-control border-start-0" 
+              placeholder="Search users..."
+              [(ngModel)]="searchTerm"
+            >
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="statusFilter">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Restaurant</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar-circle bg-primary bg-opacity-10 text-primary">
+                    {{user.name.charAt(0)}}
+                  </div>
+                  <div class="ms-3">
+                    <h6 class="mb-0">{{user.name}}</h6>
+                    <small class="text-muted">{{user.role}}</small>
+                  </div>
+                </div>
+              </td>
+              <td>{{user.email}}</td>
+              <td>{{user.restaurant}}</td>
+              <td>
+                <span class="badge" [ngClass]="user.status === 'active' ? 'bg-success' : 'bg-danger'">
+                  {{user.status | titlecase}}
+                </span>
+              </td>
+              <td>{{user.createdAt | date:'medium'}}</td>
+              <td>
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-outline-primary" (click)="editUser(user)">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(user)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+          Showing {{users.length}} users
+        </div>
+        <nav>
+          <ul class="pagination mb-0">
+            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
