@@ -86,14 +86,192 @@
           </div>
         </div>
 
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary me-2" [disabled]="restaurantForm.invalid">Create Restaurant</button>
-          <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">Cancel</button>
+        <div class="col-12 mb-3">
+          <button type="submit" class="btn btn-primary me-2" [disabled]="restaurantForm.invalid">
+            {{ isEditing ? 'Update Restaurant' : 'Create Restaurant' }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary me-2" (click)="resetForm()">Cancel</button>
         </div>
+
+        <div class="col-12">
+          <button type="button" class="btn btn-success" (click)="showDummyForm = true">
+            <i class="bi bi-plus-circle me-2"></i>Add Tenant Unit
+          </button>
+        </div>
+
+        <!-- Dummy Form -->
+        <div class="col-12 mt-3" *ngIf="showDummyForm">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Add Tenant Unit</h5>
+              <button type="button" class="btn-close" (click)="showDummyForm = false"></button>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label">Dummy Field 1</label>
+                <input type="text" class="form-control" placeholder="Enter something">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Dummy Field 2</label>
+                <input type="text" class="form-control" placeholder="Enter something else">
+              </div>
+              <button type="button" class="btn btn-primary">Add Unit</button>
+            </div>
+          </div>
+        </div>
+
+
       </div>
     </form>
   </div>
 </div>
+
+<!-- Tenant Unit Form Modal -->
+<div class="modal" [class.show]="showTenantUnit" [style.display]="showTenantUnit ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Tenant Unit</h5>
+        <button type="button" class="btn-close" (click)="closeTenantUnitForm()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="tenantUnitForm" (ngSubmit)="onTenantUnitSubmit()">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Unit Name*</label>
+              <input type="text" class="form-control" formControlName="name" placeholder="Enter unit name">
+              <div class="text-danger small" *ngIf="tenantUnitForm.get('name')?.touched && tenantUnitForm.get('name')?.invalid">
+                Unit name is required
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Floor Number*</label>
+              <input type="number" class="form-control" formControlName="floor" placeholder="Enter floor number">
+              <div class="text-danger small" *ngIf="tenantUnitForm.get('floor')?.touched && tenantUnitForm.get('floor')?.invalid">
+                Floor number is required
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Unit Number*</label>
+              <input type="text" class="form-control" formControlName="unitNumber" placeholder="Enter unit number">
+              <div class="text-danger small" *ngIf="tenantUnitForm.get('unitNumber')?.touched && tenantUnitForm.get('unitNumber')?.invalid">
+                Unit number is required
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Capacity*</label>
+              <input type="number" class="form-control" formControlName="capacity" placeholder="Enter seating capacity">
+              <div class="text-danger small" *ngIf="tenantUnitForm.get('capacity')?.touched && tenantUnitForm.get('capacity')?.invalid">
+                Capacity is required
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="unitActive" formControlName="active">
+                <label class="form-check-label" for="unitActive">Active Status</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeTenantUnitForm()">Close</button>
+        <button type="button" class="btn btn-primary" (click)="onTenantUnitSubmit()" [disabled]="tenantUnitForm.invalid || submittingUnit">
+          {{ submittingUnit ? 'Adding...' : 'Add Unit' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Restaurant Meta Form Modal -->
+<div class="modal" [class.show]="showRestaurantMeta" [style.display]="showRestaurantMeta ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Additional Restaurant Details</h5>
+        <button type="button" class="btn-close" (click)="closeRestaurantMetaForm()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="restaurantMetaForm" (ngSubmit)="onRestaurantMetaSubmit()">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Contact Email*</label>
+              <input type="email" class="form-control" formControlName="email" placeholder="Enter contact email">
+              <div class="text-danger small" *ngIf="restaurantMetaForm.get('email')?.touched && restaurantMetaForm.get('email')?.invalid">
+                <span *ngIf="restaurantMetaForm.get('email')?.errors?.['required']">Email is required</span>
+                <span *ngIf="restaurantMetaForm.get('email')?.errors?.['email']">Enter a valid email</span>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Phone Number*</label>
+              <input type="tel" class="form-control" formControlName="phone" placeholder="Enter phone number">
+              <div class="text-danger small" *ngIf="restaurantMetaForm.get('phone')?.touched && restaurantMetaForm.get('phone')?.invalid">
+                Phone number is required
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Address*</label>
+              <textarea class="form-control" formControlName="address" rows="3" placeholder="Enter complete address"></textarea>
+              <div class="text-danger small" *ngIf="restaurantMetaForm.get('address')?.touched && restaurantMetaForm.get('address')?.invalid">
+                Address is required
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Restaurant Features</label>
+              <div class="row g-2">
+                <div class="col-md-4" *ngFor="let feature of availableFeatures">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" [id]="'feature_' + feature.value"
+                           [value]="feature.value" (change)="onFeatureChange($event)">
+                    <label class="form-check-label" [for]="'feature_' + feature.value">{{feature.label}}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Opening Hours</label>
+              <div class="row g-2" formGroupName="openingHours">
+                <div class="col-md-6" *ngFor="let day of weekDays">
+                  <div class="card">
+                    <div class="card-body p-2">
+                      <h6 class="card-title mb-2">{{day}}</h6>
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <input type="time" class="form-control form-control-sm" [formControlName]="day + '_open'" placeholder="Open">
+                        </div>
+                        <div class="col-6">
+                          <input type="time" class="form-control form-control-sm" [formControlName]="day + '_close'" placeholder="Close">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeRestaurantMetaForm()">Close</button>
+        <button type="button" class="btn btn-primary" (click)="onRestaurantMetaSubmit()" [disabled]="restaurantMetaForm.invalid || submittingMeta">
+          {{ submittingMeta ? 'Saving...' : 'Save Details' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showTenantUnit || showRestaurantMeta"></div>
 
   <!-- Restaurants Table -->
   <div class="card border-0 shadow-sm" *ngIf="!showAddForm">
@@ -152,7 +330,7 @@
               <td><small class="text-muted">{{ restaurant.updated_at | date:'short' }}</small></td>
               <td>
                 <div class="btn-group">
-                  <button class="btn btn-sm btn-outline-primary" title="Edit">
+                  <button class="btn btn-sm btn-outline-primary" title="Edit" (click)="editRestaurant(restaurant)">
                     <i class="bi bi-pencil"></i>
                   </button>
                   <button class="btn btn-sm btn-outline-danger" title="Delete">
