@@ -1,0 +1,169 @@
+/* Dashboard styles */
+.container-fluid {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+/* Welcome section */
+h1 {
+  font-weight: 700;
+  color: #2c3e50;
+  font-size: 2.2rem;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Stats Cards */
+.card {
+  transition: all 0.3s ease;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-body {
+  padding: 1.8rem;
+}
+
+/* Stats Icons */
+.rounded-circle {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.card:hover .rounded-circle {
+  transform: scale(1.1);
+}
+
+/* Stats Typography */
+.card-subtitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Chart Cards */
+.chart-card {
+  margin-bottom: 1.5rem;
+}
+
+.chart-card .card-body {
+  height: 350px;
+  padding: 1.5rem;
+}
+
+.chart-card canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Gradient Backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(45deg, #4e73df 0%, #224abe 100%) !important;
+}
+
+.bg-gradient-success {
+  background: linear-gradient(45deg, #1cc88a 0%, #13855c 100%) !important;
+}
+
+.bg-gradient-warning {
+  background: linear-gradient(45deg, #f6c23e 0%, #dda20a 100%) !important;
+}
+
+.bg-gradient-info {
+  background: linear-gradient(45deg, #36b9cc 0%, #258391 100%) !important;
+}
+
+.card-title {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* Charts */
+.chart-card {
+  height: 100%;
+}
+
+canvas {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 300px;
+}
+
+.chart-container {
+  position: relative;
+  margin: auto;
+  height: 350px;
+  padding: 1rem;
+}
+
+/* Card Headers */
+.card-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-header h5 {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Gradient backgrounds for stat cards */
+.bg-gradient-primary {
+  background: linear-gradient(45deg, #4e73df 0%, #6f42c1 100%);
+}
+
+.bg-gradient-success {
+  background: linear-gradient(45deg, #1cc88a 0%, #20c997 100%);
+}
+
+.bg-gradient-warning {
+  background: linear-gradient(45deg, #f6c23e 0%, #ffc107 100%);
+}
+
+.bg-gradient-info {
+  background: linear-gradient(45deg, #36b9cc 0%, #0dcaf0 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .container-fluid {
+    padding: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .card-body {
+    padding: 1.2rem;
+  }
+  
+  canvas {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  .rounded-circle {
+    width: 50px;
+    height: 50px;
+  }
+  
+  canvas {
+    min-height: 200px;
+  }
+}

@@ -1,0 +1,177 @@
+<div class="container-fluid py-4">
+  <!-- Alert Messages -->
+  <div class="alert alert-success alert-dismissible fade show" role="alert" *ngIf="addSuccessMessage">
+    <i class="bi bi-check-circle me-2"></i>{{ addSuccessMessage }}
+    <button type="button" class="btn-close" (click)="addSuccessMessage = ''"></button>
+  </div>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert" *ngIf="addErrorMessage">
+    <i class="bi bi-exclamation-circle me-2"></i>{{ addErrorMessage }}
+    <button type="button" class="btn-close" (click)="addErrorMessage = ''"></button>
+  </div>
+
+  <!-- List Operation Alerts -->
+  <div class="alert alert-danger alert-dismissible fade show" role="alert" *ngIf="listErrorMessage">
+    <i class="bi bi-exclamation-circle me-2"></i>{{ listErrorMessage }}
+    <button type="button" class="btn-close" (click)="listErrorMessage = ''"></button>
+  </div>
+
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="mb-0">{{showAddForm ? 'Add New Restaurant' : 'Restaurants Management'}}</h1>
+      <p class="text-muted">{{showAddForm ? 'Create a new restaurant profile' : 'Manage restaurant profiles'}}</p>
+    </div>
+    <button class="btn btn-primary" (click)="showAddForm = true" *ngIf="!showAddForm">
+      <i class="bi bi-plus-lg me-2"></i>Add New Restaurant
+    </button>
+  </div>
+
+<!-- Add Restaurant Form -->
+<div class="card border-0 shadow-sm mb-4" *ngIf="showAddForm">
+  <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <h5 class="card-title mb-0">Restaurant Details</h5>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="restaurantForm" (ngSubmit)="onSubmit()">
+      <!-- Restaurant Image Upload -->
+      <div class="mb-4 text-center">
+        <div class="position-relative d-inline-block">
+          <div class="avatar-preview rounded border" 
+               [style.background-image]="previewUrl ? 'url(' + previewUrl + ')' : 'none'"
+               [style.background-size]="'cover'"
+               style="width: 200px; height: 150px; background-color: #f8f9fa;">
+            <div *ngIf="!previewUrl" class="d-flex align-items-center justify-content-center h-100">
+              <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+            </div>
+          </div>
+          <label class="btn btn-sm btn-primary position-absolute bottom-0 end-0 me-2 mb-2">
+            <i class="bi bi-camera-fill"></i>
+            <input type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)">
+          </label>
+        </div>
+        <small class="d-block text-muted mt-2">Click the camera icon to upload restaurant image</small>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Restaurant Name*</label>
+          <input type="text" class="form-control" formControlName="name" placeholder="Enter restaurant name">
+          <div class="text-danger small" *ngIf="restaurantForm.get('name')?.touched && restaurantForm.get('name')?.invalid">
+            Restaurant name is required
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Website URL*</label>
+          <input type="url" class="form-control" formControlName="website" placeholder="https://example.com">
+          <div class="text-danger small" *ngIf="restaurantForm.get('website')?.touched && restaurantForm.get('website')?.invalid">
+            <span *ngIf="restaurantForm.get('website')?.errors?.['required']">Website URL is required</span>
+            <span *ngIf="restaurantForm.get('website')?.errors?.['pattern']">Enter a valid URL starting with http:// or https://</span>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">GST Number*</label>
+          <input type="text" class="form-control" formControlName="gst" placeholder="Enter GST number">
+          <div class="text-danger small" *ngIf="restaurantForm.get('gst')?.touched && restaurantForm.get('gst')?.invalid">
+            <span *ngIf="restaurantForm.get('gst')?.errors?.['required']">GST number is required</span>
+            <span *ngIf="restaurantForm.get('gst')?.errors?.['minlength']">GST number must be at least 15 characters</span>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="active" formControlName="active">
+            <label class="form-check-label" for="active">Active Status</label>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary me-2" [disabled]="restaurantForm.invalid">Create Restaurant</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <!-- Restaurants Table -->
+  <div class="card border-0 shadow-sm" *ngIf="!showAddForm">
+    <div class="card-body">
+      <!-- Search and Filter -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control border-start-0" placeholder="Search restaurants...">
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Website</th>
+              <th>Status</th>
+              <th>GST</th>
+              <th>Created At</th>
+              <th>Updated At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="9" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+            <tr *ngFor="let restaurant of restaurants">
+              <td><small class="text-muted">#{{ restaurant.id }}</small></td>
+              <td>
+                <img [src]="restaurant.image" alt="Restaurant image" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+              </td>
+              <td>{{ restaurant.name }}</td>
+              <td>
+                <a [href]="restaurant.website" target="_blank" class="text-decoration-none">{{ restaurant.website }}</a>
+              </td>
+              <td>
+                <span class="badge" [class.bg-success]="restaurant.active" [class.bg-danger]="!restaurant.active">
+                  {{ restaurant.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td><small>{{ restaurant.gst }}</small></td>
+              <td><small class="text-muted">{{ restaurant.created_at | date:'short' }}</small></td>
+              <td><small class="text-muted">{{ restaurant.updated_at | date:'short' }}</small></td>
+              <td>
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-outline-primary" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!loading && restaurants.length === 0">
+              <td colspan="9" class="text-center py-4">
+                <div class="text-muted">
+                  <i class="bi bi-inbox fs-2 mb-2"></i>
+                  <p class="mb-0">No restaurants found</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
