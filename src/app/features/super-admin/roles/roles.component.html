@@ -1,0 +1,72 @@
+<div class="container-fluid py-4">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="mb-0">{{showAddForm ? 'Add New Role' : 'Roles Management'}}</h1>
+      <p class="text-muted">{{showAddForm ? 'Create a new role' : 'Manage system roles and permissions'}}</p>
+    </div>
+    <button class="btn btn-primary" (click)="showAddForm = true" *ngIf="!showAddForm">
+      <i class="bi bi-plus-lg me-2"></i>Add New Role
+    </button>
+  </div>
+    
+  <!-- Add Role Form -->
+  <div class="card border-0 shadow-sm mb-4" *ngIf="showAddForm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Role Details</h5>
+      <button class="btn btn-outline-secondary btn-sm" (click)="showAddForm = false">
+        <i class="bi bi-arrow-left me-2"></i>Back to List
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Role Name</label>
+          <input type="text" class="form-control" [(ngModel)]="newRole.name" 
+                 placeholder="Enter role name">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-control" [(ngModel)]="newRole.description"
+                 placeholder="Enter role description">
+        </div>
+      </div>
+      <div class="mt-4">
+        <button type="button" (click)="addRole()" class="btn btn-primary">
+          <i class="bi bi-check-lg me-2"></i>Save Role
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Roles List -->
+  <div class="card border-0 shadow-sm" *ngIf="!showAddForm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let role of roles">
+              <td>{{role.name}}</td>
+              <td>{{role.description}}</td>
+              <td>{{role.createdAt | date:'short'}}</td>
+              <td>
+                <button (click)="deleteRole(role.id)" 
+                        class="btn btn-sm btn-outline-danger">
+                  <i class="bi bi-trash me-1"></i>Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
