@@ -36,6 +36,17 @@ export interface TenantUnit {
   updated_at?: string;
 }
 
+export interface State {
+  id: number;
+  name: string;
+}
+
+export interface Country {
+  id: number;
+  name: string;
+  code: string;
+}
+
 export interface Restaurant {
   id?: number;
   name: string;
@@ -121,78 +132,25 @@ export class RestaurantsService {
 
   // Add new restaurant
   addRestaurant(formData: FormData): Observable<any> {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    // Log the token being used
-    console.log('Using token:', token);
-
-    // Create headers with Authorization
-    let headers = new HttpHeaders();
-    if (token) {
-      headers = headers
-        .set('Authorization', `Bearer ${token}`)
-        .set('Accept', 'application/json');
-    } else {
-      throw new Error('No authentication token found');
-    }
-
-    // Log the complete request details
-    console.log('Request URL:', `${this.apiUrl}/addtenants`);
-    console.log('Request Headers:', headers);
+    const headers = this.getHeaders();
     
-    // Log FormData contents
+    // Log request details
+    console.log('Request URL:', `${this.apiUrl}/addtenants`);
     console.log('FormData contents:');
     formData.forEach((value, key) => {
       console.log(`${key}:`, value);
     });
 
-    // Log the final request configuration
-    console.log('Final request config:', {
-      url: `${this.apiUrl}/addtenants`,
-      headers: headers.keys().reduce((obj, key) => {
-        obj[key] = headers.get(key);
-        return obj;
-      }, {} as any),
-      formData: Array.from(formData.entries())
-    });
-
-    return this.http.post(`${this.apiUrl}/addtenants`, formData, { 
-      headers,
-      observe: 'response',
-      responseType: 'json'
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/addtenants`, formData, {
+      headers: headers.delete('Content-Type') // Let browser set correct Content-Type for FormData
     }).pipe(
       map(response => {
-        console.log('Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: response.body,
-          headers: response.headers.keys().reduce((obj, key) => {
-            obj[key] = response.headers.get(key);
-            return obj;
-          }, {} as any)
-        });
-        return response.body;
+        console.log('Response:', response);
+        return response;
       }),
       catchError(error => {
-        // Log the complete error object
-        console.error('Error object:', error);
-
-        // Log specific error details
-        console.error('Error details:', {
-          status: error.status,
-          statusText: error.statusText,
-          message: error.message,
-          url: error.url,
-          error: error.error
-        });
-
-        if (error.status === 500) {
-          throw new Error('Server error occurred. Please try again.');
-        }
-        throw error;
+        console.error('Error adding restaurant:', error);
+        throw error.error || error;
       })
     );
   }
@@ -343,9 +301,11 @@ export class RestaurantsService {
   }
 
   // Add tenant unit
-  addTenantUnit(unitData: TenantUnit): Observable<any> {
+  addTenantUnit(data: any): Observable<ApiResponse<TenantUnit>> {
     const headers = this.getHeaders();
-    return this.http.post(`${this.apiUrl}/tenantunit`, unitData, { headers })
+    console.log('Sending tenant unit data:', data);
+
+    return this.http.post<ApiResponse<TenantUnit>>(`${this.apiUrl}/tenantunit`, data, { headers })
       .pipe(
         map(response => {
           console.log('Add Unit Response:', response);
@@ -369,5 +329,45 @@ export class RestaurantsService {
       .pipe(catchError(this.handleError));
   }
 
+  // Get states by country ID
+  getStates(countryId: number): Observable<State[]> {
+    console.log('Making API call to get states for country:', countryId);
+    const headers = this.getHeaders();
+    const url = `${this.apiUrl}/location/states/${countryId}`;
+    console.log('API URL:', url);
+    return this.http.get<ApiResponse<State[]>>(url, { headers })
+      .pipe(
+        map(response => {
+          console.log('States response:', response);
+          if (response.success && response.data) {
+            console.log('Extracted states data:', response.data);
+            return response.data;
+          }
+          throw new Error('Invalid response format from states API');
+        }),
+        catchError(error => {
+          console.error('Error fetching states:', error);
+          throw error.error?.message || 'Failed to fetch states';
+        })
+      );
+  }
 
+  // Get all countries
+  getCountries(): Observable<Country[]> {
+    const headers = this.getHeaders();
+    return this.http.get<ApiResponse<Country[]>>(`${this.apiUrl}/location/countries`, { headers })
+      .pipe(
+        map(response => {
+          console.log('Countries response:', response);
+          if (response.success && response.data) {
+            return response.data;
+          }
+          throw new Error('Invalid response format from countries API');
+        }),
+        catchError(error => {
+          console.error('Error fetching countries:', error);
+          throw new Error(error.error?.message || 'Failed to fetch countries');
+        })
+      );
+  }
 }
