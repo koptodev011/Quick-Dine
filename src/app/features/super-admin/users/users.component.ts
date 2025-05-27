@@ -14,6 +14,7 @@ export class UsersComponent {
   searchTerm = '';
   statusFilter = 'all';
   userForm: FormGroup;
+  branches: { id: number; value: string }[] = [];
 
   // Dummy data - replace with API call later
   users = [
@@ -53,10 +54,13 @@ export class UsersComponent {
     this.userForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
+      phone: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
-      restaurant: ['', Validators.required],
+      roles: ['', Validators.required],
       profilePhoto: [''],
+      isActive: [true],
+      branches: this.fb.array([]),
     }, {
       validators: this.passwordMatchValidator
     });
@@ -89,19 +93,20 @@ export class UsersComponent {
   onSubmit() {
     if (this.userForm.valid) {
       const formData = this.userForm.value;
-      delete formData.confirmPassword; // Remove confirm password before saving
+      delete formData.confirmPassword;
       
       const newUser = {
         id: this.users.length + 1,
         ...formData,
-        role: 'Admin',
-        status: 'active',
+        status: formData.isActive ? 'active' : 'inactive',
         createdAt: new Date(),
-        profilePhotoUrl: this.previewUrl // Add the profile photo URL
+        profilePhotoUrl: this.previewUrl,
+        branches: this.branches.filter(b => b.value)
       };
       
       this.users.unshift(newUser);
       this.userForm.reset();
+      this.branches = [];
       this.showAddForm = false;
     }
   }
@@ -114,6 +119,21 @@ export class UsersComponent {
   deleteUser(user: any) {
     if (confirm('Are you sure you want to delete this user?')) {
       this.users = this.users.filter(u => u.id !== user.id);
+    }
+  }
+
+  addBranch() {
+    if (this.branches.length === 0) {
+      this.branches.push({ id: 1, value: '' });
+    } else {
+      const newId = this.branches[this.branches.length - 1].id + 1;
+      this.branches.push({ id: newId, value: '' });
+    }
+  }
+
+  removeBranch(index: number) {
+    if (this.branches.length > 1) {
+      this.branches = this.branches.filter((_, i) => i !== index);
     }
   }
 }
