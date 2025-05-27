@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RestaurantsService, Restaurant, ApiResponse, TenantUnit, RestaurantMeta } from './restaurants.service';
+import { RestaurantsService, Restaurant, ApiResponse, TenantUnit, RestaurantMeta, Country, State } from './restaurants.service';
 import { HttpClientModule } from '@angular/common/http';
 
 
@@ -14,7 +14,13 @@ import { HttpClientModule } from '@angular/common/http';
   styleUrls: ['./restaurants.component.css']
 })
 export class RestaurantsComponent implements OnInit {
-  showDummyForm = false;
+  countries: Country[] = [];
+  states: State[] = [];
+  loadingCountries = false;
+  loadingStates = false;
+  countryError = '';
+  stateError = '';
+  showInlineUnitForm = false;
   // Restaurant Meta Form
   restaurantMetaForm: FormGroup;
   showRestaurantMeta = false;
@@ -44,6 +50,7 @@ export class RestaurantsComponent implements OnInit {
   submitting = false;
   showAddForm = false;
   previewUrl: string | null = null;
+  tenantUnitPreviewUrl: string | null = null;
   listErrorMessage = '';
   addErrorMessage = '';
   addSuccessMessage = '';
@@ -70,11 +77,25 @@ export class RestaurantsComponent implements OnInit {
     });
     // Initialize tenant unit form
     this.tenantUnitForm = this.formBuilder.group({
+      id: [''],
       name: ['', [Validators.required]],
-      floor: ['', [Validators.required]],
-      unitNumber: ['', [Validators.required]],
-      capacity: ['', [Validators.required, Validators.min(1)]],
-      active: [true]
+      tenant_id: [''],
+      line_one: ['', [Validators.required]],
+      line_two: [''],
+      line_three: [''],
+      landmark: [''],
+      city: ['', [Validators.required]],
+      postal_code: ['', [Validators.required]],
+      latitude: [''],
+      longitude: [''],
+      altitude: [''],
+      state_id: ['', [Validators.required]],
+      country_id: ['', [Validators.required]],
+      image: [null],
+      active: [true],
+      default: [false],
+      meta: [''],
+      deleted_at: [null]
     });
     // Restaurant form
     this.restaurantForm = this.formBuilder.group({
@@ -90,6 +111,21 @@ export class RestaurantsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadRestaurants();
+    this.loadCountries();
+  }
+
+  onTenantUnitImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.tenantUnitForm.patchValue({
+          image: file
+        });
+        this.tenantUnitPreviewUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   loadRestaurants(): void {
@@ -234,45 +270,115 @@ export class RestaurantsComponent implements OnInit {
   }
 
   // Tenant Unit Methods
-  showTenantUnitForm(): void {
+  onCountryChange(event: any): void {
+    const countryId = event.target.value;
+    console.log('Country selected:', countryId);
+    if (countryId) {
+      console.log('Loading states for country:', countryId);
+      this.loadStates(+countryId);
+    } else {
+      console.log('No country selected, clearing states');
+      this.states = [];
+      this.tenantUnitForm.patchValue({ state_id: '' });
+    }
+  }
+
+  loadStates(countryId: number): void {
+    console.log('loadStates called with countryId:', countryId);
+    this.loadingStates = true;
+    this.stateError = '';
+    this.states = [];
+    this.tenantUnitForm.patchValue({ state_id: '' });
+
+    this.restaurantsService.getStates(countryId).subscribe({
+      next: (states) => {
+        console.log('States loaded successfully:', states);
+        this.states = states;
+        this.loadingStates = false;
+      },
+      error: (error) => {
+        console.error('Error loading states:', error);
+        this.stateError = error.message || 'Failed to load states';
+        this.loadingStates = false;
+      }
+    });
+  }
+
+  loadCountries(): void {
+    this.loadingCountries = true;
+    this.countryError = '';
+    this.restaurantsService.getCountries().subscribe({
+      next: (countries) => {
+        this.countries = countries;
+        this.loadingCountries = false;
+      },
+      error: (error) => {
+        this.countryError = error.message || 'Failed to load countries';
+        this.loadingCountries = false;
+        console.error('Error loading countries:', error);
+      }
+    });
+  }
+
+  showTenantUnitForm(tenantId?: string | null): void {
     if (!this.editingRestaurantId) {
       this.addErrorMessage = 'No restaurant selected for adding unit';
       return;
     }
     this.showTenantUnit = true;
-    this.tenantUnitForm.reset({ active: true });
+    this.tenantUnitForm.reset({ 
+      active: true,
+      tenant_id: tenantId || this.editingRestaurantId || '' // Use tenant ID if provided, otherwise use restaurant ID
+    });
   }
 
   closeTenantUnitForm(): void {
     this.showTenantUnit = false;
     this.tenantUnitForm.reset();
-    this.tenantUnitErrorMessage = '';
   }
 
   onTenantUnitSubmit(): void {
     if (this.tenantUnitForm.valid && !this.submittingUnit) {
       this.submittingUnit = true;
-      this.tenantUnitErrorMessage = '';
+      const formValue = this.tenantUnitForm.value;
+      const data: any = {};
 
-      const unitData = {
-        ...this.tenantUnitForm.value,
-        tenantId: this.editingRestaurantId
-      };
+      // Add all form fields to data object
+      if (formValue) {
+        Object.keys(formValue).forEach(key => {
+          if (formValue[key] !== null && formValue[key] !== undefined) {
+            data[key] = formValue[key];
+          }
+        });
+      }
 
-      console.log('Submitting unit data:', unitData);
+      // Add the restaurant ID
+      if (this.editingRestaurantId) {
+        data.restaurant_id = this.editingRestaurantId;
+        // Make sure tenant_id is set
+        if (!data.tenant_id) {
+          data.tenant_id = this.editingRestaurantId;
+        }
+      }
 
-      this.restaurantsService.addTenantUnit(unitData as TenantUnit).subscribe({
+      // Log the data being sent
+      console.log('Sending data:', data);
+
+      this.restaurantsService.addTenantUnit(data).subscribe({
         next: (response: ApiResponse<TenantUnit>) => {
-          console.log('Unit added successfully:', response);
-          this.addSuccessMessage = 'Tenant unit added successfully';
-          this.closeTenantUnitForm();
-        },
-        error: (error: Error) => {
-          console.error('Error adding unit:', error);
-          this.tenantUnitErrorMessage = error.message || 'Failed to add tenant unit';
+          if (response.success) {
+            this.addSuccessMessage = 'Tenant unit added successfully';
+            this.tenantUnitForm.reset();
+            this.showTenantUnit = false;
+            this.loadRestaurants();
+          } else {
+            this.tenantUnitErrorMessage = response.message || 'Error adding tenant unit';
+          }
           this.submittingUnit = false;
         },
-        complete: () => {
+        error: (error: any) => {
+          console.error('Error adding tenant unit:', error);
+          this.tenantUnitErrorMessage = 'Error adding tenant unit';
           this.submittingUnit = false;
         }
       });
@@ -280,29 +386,22 @@ export class RestaurantsComponent implements OnInit {
   }
 
   editRestaurant(restaurant: Restaurant): void {
-    const id = restaurant.id?.toString() ?? null;
-    this.editingRestaurantId = id;
-    this.isEditing = true;
-    this.showAddForm = true;
+    if (restaurant && restaurant.id) {
+      this.editingRestaurantId = restaurant.id.toString();
+      this.isEditing = true;
+      this.showAddForm = true;
+      
+      this.restaurantForm.patchValue({
+        name: restaurant.name,
+        active: restaurant.active || false
+      });
 
-    // Set form values
-    this.restaurantForm.patchValue({
-      name: restaurant.name,
-      website: restaurant.website || null,
-      gst: restaurant.gst
-    });
-
-    // Set image preview if exists
-    if (restaurant.image) {
-      this.previewUrl = 'http://localhost:3000/' + restaurant.image;
+      // Set image preview if exists
+      if (restaurant.image) {
+        this.previewUrl = 'http://localhost:3000/' + restaurant.image;
+      }
     }
   }
-
-
-
-
-
-
 
 
 
