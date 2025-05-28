@@ -1,0 +1,209 @@
+<!-- Edit Restaurant Form -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="mb-0">Edit Restaurant</h1>
+      <p class="text-muted">Update restaurant details</p>
+    </div>
+  </div>
+  
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Restaurant Details</h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="restaurantForm" (ngSubmit)="onSubmit()">
+        <div class="mb-4 text-center">
+          <div class="position-relative d-inline-block">
+            <div class="avatar-preview rounded border"
+                 [style.background-image]="previewUrl ? 'url(' + previewUrl + ')' : 'none'"
+                 [style.background-size]="'cover'"
+                 style="width: 200px; height: 150px; background-color: #f8f9fa;">
+              <div *ngIf="!previewUrl" class="d-flex align-items-center justify-content-center h-100">
+                <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+              </div>
+            </div>
+            <label class="btn btn-sm btn-primary position-absolute bottom-0 end-0 me-2 mb-2">
+              <i class="bi bi-camera-fill"></i>
+              <input type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)">
+            </label>
+          </div>
+          <small class="d-block text-muted mt-2">Click the camera icon to upload restaurant image</small>
+        </div>
+  
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Restaurant Name*</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="Enter restaurant name">
+            <div class="text-danger small" *ngIf="restaurantForm.get('name')?.touched && restaurantForm.get('name')?.invalid">
+              Restaurant name is required
+            </div>
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Website URL*</label>
+            <input type="url" class="form-control" formControlName="website" placeholder="https://example.com">
+            <div class="text-danger small" *ngIf="restaurantForm.get('website')?.touched && restaurantForm.get('website')?.invalid">
+              <span *ngIf="restaurantForm.get('website')?.errors?.['required']">Website URL is required</span>
+              <span *ngIf="restaurantForm.get('website')?.errors?.['pattern']">Enter a valid URL</span>
+            </div>
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">GST Number*</label>
+            <input type="text" class="form-control" formControlName="gst" placeholder="Enter GST number">
+            <div class="text-danger small" *ngIf="restaurantForm.get('gst')?.touched && restaurantForm.get('gst')?.invalid">
+              <span *ngIf="restaurantForm.get('gst')?.errors?.['required']">GST number is required</span>
+              <span *ngIf="restaurantForm.get('gst')?.errors?.['minlength']">Minimum 15 characters</span>
+            </div>
+          </div>
+  
+          <div class="col-12">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="active" formControlName="active">
+              <label class="form-check-label" for="active">Active Status</label>
+            </div>
+          </div>
+  
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary me-2" [disabled]="restaurantForm.invalid">
+              {{ isEditing ? 'Update Restaurant' : 'Edit Restaurant' }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Tenant Unit -->
+<div class="card mt-4" *ngIf="showInlineUnitForm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Add Tenant Unit</h5>
+      <button type="button" class="btn-close" (click)="showInlineUnitForm = false"></button>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="tenantUnitForm" (ngSubmit)="onTenantUnitSubmit()">
+        <div class="row g-3">
+  
+          <div class="col-12 mb-4 text-center">
+            <div class="position-relative d-inline-block">
+              <div class="avatar-preview rounded border"
+                   [style.background-image]="previewUrl ? 'url(' + previewUrl + ')' : 'none'"
+                   [style.background-size]="'cover'"
+                   style="width: 200px; height: 150px; background-color: #f8f9fa;">
+                <div *ngIf="!previewUrl" class="d-flex align-items-center justify-content-center h-100">
+                  <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+                </div>
+              </div>
+              <label class="btn btn-sm btn-primary position-absolute bottom-0 end-0 me-2 mb-2">
+                <i class="bi bi-camera-fill"></i>
+                <input type="file" class="d-none" accept="image/*" (change)="onTenantUnitImageSelected($event)">
+              </label>
+            </div>
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Name*</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="Enter unit name">
+            <div class="text-danger small" *ngIf="tenantUnitForm.get('name')?.touched && tenantUnitForm.get('name')?.invalid">
+              Name is required
+            </div>
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Address Line 1*</label>
+            <input type="text" class="form-control" formControlName="line_one" placeholder="Enter address line 1">
+            <div class="text-danger small" *ngIf="tenantUnitForm.get('line_one')?.touched && tenantUnitForm.get('line_one')?.invalid">
+              Address line 1 is required
+            </div>
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Address Line 2</label>
+            <input type="text" class="form-control" formControlName="line_two" placeholder="Enter address line 2">
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Address Line 3</label>
+            <input type="text" class="form-control" formControlName="line_three" placeholder="Enter address line 3">
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Landmark</label>
+            <input type="text" class="form-control" formControlName="landmark" placeholder="Enter landmark">
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">City*</label>
+            <input type="text" class="form-control" formControlName="city" placeholder="Enter city">
+            <div class="text-danger small" *ngIf="tenantUnitForm.get('city')?.touched && tenantUnitForm.get('city')?.invalid">
+              City is required
+            </div>
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Postal Code*</label>
+            <input type="text" class="form-control" formControlName="postal_code" placeholder="Enter postal code">
+            <div class="text-danger small" *ngIf="tenantUnitForm.get('postal_code')?.touched && tenantUnitForm.get('postal_code')?.invalid">
+              Postal code is required
+            </div>
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Latitude</label>
+            <input type="number" step="any" class="form-control" formControlName="lattitude" placeholder="Enter latitude">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Longitude</label>
+            <input type="number" step="any" class="form-control" formControlName="longitude" placeholder="Enter longitude">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Altitude</label>
+            <input type="number" step="any" class="form-control" formControlName="altitude" placeholder="Enter altitude">
+          </div>
+  
+          <div class="col-md-6">
+            <select class="form-select" formControlName="country_id" (change)="onCountryChange($event)">
+              <option value="">Select Country</option>
+              <option *ngFor="let country of countries" [value]="country.id">{{ country.name }}</option>
+            </select>
+          </div>
+  
+          <div class="col-md-6">
+            <select class="form-select" formControlName="state_id">
+              <option value="">Select State</option>
+              <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+            </select>
+          </div>
+  
+          <div class="col-12">
+            <div class="form-check me-3 d-inline-block">
+              <input type="checkbox" class="form-check-input" id="unit-active" formControlName="active">
+              <label class="form-check-label" for="unit-active">Active Status</label>
+            </div>
+            <div class="form-check d-inline-block">
+              <input type="checkbox" class="form-check-input" id="unit-default" formControlName="default">
+              <label class="form-check-label" for="unit-default">Set as Default</label>
+            </div>
+          </div>
+  
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary" [disabled]="tenantUnitForm.invalid || submittingUnit">
+              {{ submittingUnit ? 'Adding...' : 'Add Unit' }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary ms-2" (click)="showInlineUnitForm = false">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Trigger Button -->
+  <div class="mt-3">
+    <button type="button" class="btn btn-success" (click)="showInlineUnitForm = true">
+      <i class="bi bi-plus-circle me-2"></i>Add Tenant Unit
+    </button>
+  </div>
+  

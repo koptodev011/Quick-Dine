@@ -6,6 +6,7 @@ import { UsersComponent } from "./features/super-admin/users/users.component";
 import { RolesComponent } from "./features/super-admin/roles/roles.component";
 import { RestaurantsComponent } from "./features/super-admin/restaurants/restaurants.component";
 import { authGuard } from "./core/guards/auth.guard";
+import { EditRestaurantsComponent } from "./features/super-admin/restaurants/edit-restaurants/edit-restaurants.component";
 
 export const routes: Routes = [
   { path: "", redirectTo: "login", pathMatch: "full" },
@@ -14,5 +15,6 @@ export const routes: Routes = [
   { path: "home", component: HomeComponent, canActivate: [authGuard] },
   { path: "restaurants", component: RestaurantsComponent, canActivate: [authGuard] },
   { path: "users", component: UsersComponent, canActivate: [authGuard] },
-  { path: "roles", component: RolesComponent, canActivate: [authGuard] }
+  { path: "roles", component: RolesComponent, canActivate: [authGuard] },
+  { path: 'edit-restaurant/:id', component: EditRestaurantsComponent },
 ];
