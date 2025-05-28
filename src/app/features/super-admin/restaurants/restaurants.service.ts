@@ -329,6 +329,21 @@ export class RestaurantsService {
       .pipe(catchError(this.handleError));
   }
 
+  // Get tenant
+  getTenant(id: string): Observable<any> {
+    const headers = this.getHeaders();
+    return this.http.get(`${this.apiUrl}/tenants/${id}`, { headers }).pipe(
+      map(response => {
+        console.log('Get tenant response:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error getting tenant:', error);
+        throw error;
+      })
+    );
+  }
+
   // Get states by country ID
   getStates(countryId: number): Observable<State[]> {
     console.log('Making API call to get states for country:', countryId);

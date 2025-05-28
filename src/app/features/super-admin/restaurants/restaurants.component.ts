@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RestaurantsService, Restaurant, ApiResponse, TenantUnit, RestaurantMeta, Country, State } from './restaurants.service';
@@ -16,6 +17,7 @@ import { HttpClientModule } from '@angular/common/http';
 export class RestaurantsComponent implements OnInit {
   countries: Country[] = [];
   states: State[] = [];
+  
   loadingCountries = false;
   loadingStates = false;
   countryError = '';
@@ -59,7 +61,8 @@ export class RestaurantsComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private restaurantsService: RestaurantsService
+    private restaurantsService: RestaurantsService,
+    private router: Router
   ) {
     // Initialize restaurant meta form
     this.restaurantMetaForm = this.formBuilder.group({
@@ -112,8 +115,18 @@ export class RestaurantsComponent implements OnInit {
   ngOnInit(): void {
     this.loadRestaurants();
     this.loadCountries();
+
+    // Subscribe to country_id changes
+    this.tenantUnitForm.get('country_id')?.valueChanges.subscribe(countryId => {
+      if (countryId) {
+        this.onCountryChange(countryId);
+      } else {
+        this.states = [];
+      }
+    });
   }
 
+ 
   onTenantUnitImageSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
@@ -269,47 +282,40 @@ export class RestaurantsComponent implements OnInit {
     this.editingRestaurantId = null;
   }
 
-  // Tenant Unit Methods
+
+
   onCountryChange(event: any): void {
     const countryId = event.target.value;
-    console.log('Country selected:', countryId);
     if (countryId) {
-      console.log('Loading states for country:', countryId);
       this.loadStates(+countryId);
     } else {
-      console.log('No country selected, clearing states');
       this.states = [];
       this.tenantUnitForm.patchValue({ state_id: '' });
     }
   }
-
+  
+  // Load states from API
   loadStates(countryId: number): void {
-    console.log('loadStates called with countryId:', countryId);
-    this.loadingStates = true;
-    this.stateError = '';
-    this.states = [];
-    this.tenantUnitForm.patchValue({ state_id: '' });
-
     this.restaurantsService.getStates(countryId).subscribe({
       next: (states) => {
-        console.log('States loaded successfully:', states);
-        this.states = states;
-        this.loadingStates = false;
+        this.states = states; // Now states[] is filled with ID + name
       },
       error: (error) => {
-        console.error('Error loading states:', error);
-        this.stateError = error.message || 'Failed to load states';
-        this.loadingStates = false;
+        console.error('Failed to load states:', error);
+        this.states = [];
       }
     });
   }
+  
+
 
   loadCountries(): void {
     this.loadingCountries = true;
     this.countryError = '';
+  
     this.restaurantsService.getCountries().subscribe({
       next: (countries) => {
-        this.countries = countries;
+        this.countries = countries; // ✅ Sets the dropdown data
         this.loadingCountries = false;
       },
       error: (error) => {
@@ -319,6 +325,7 @@ export class RestaurantsComponent implements OnInit {
       }
     });
   }
+  
 
   showTenantUnitForm(tenantId?: string | null): void {
     if (!this.editingRestaurantId) {
@@ -385,24 +392,7 @@ export class RestaurantsComponent implements OnInit {
     }
   }
 
-  editRestaurant(restaurant: Restaurant): void {
-    if (restaurant && restaurant.id) {
-      this.editingRestaurantId = restaurant.id.toString();
-      this.isEditing = true;
-      this.showAddForm = true;
-      
-      this.restaurantForm.patchValue({
-        name: restaurant.name,
-        active: restaurant.active || false
-      });
-
-      // Set image preview if exists
-      if (restaurant.image) {
-        this.previewUrl = 'http://localhost:3000/' + restaurant.image;
-      }
-    }
-  }
-
+  
 
 
   onSubmit(): void {
@@ -526,5 +516,12 @@ export class RestaurantsComponent implements OnInit {
     } else {
       this.addErrorMessage = 'Please fill in all required fields';
     }
+  }
+
+
+
+  editRestaurant(restaurant: any) {
+    const restaurantId = restaurant.id;
+    this.router.navigate(['/edit-restaurant', restaurantId]);
   }
 }

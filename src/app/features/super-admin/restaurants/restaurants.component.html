@@ -27,13 +27,12 @@
   </div>
 
 <!-- Add Restaurant Form -->
-<div class="card border-0 shadow-sm mb-4" *ngIf="showAddForm">
+<!-- <div class="card border-0 shadow-sm mb-4" *ngIf="showAddForm">
   <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
     <h5 class="card-title mb-0">Restaurant Details</h5>
   </div>
   <div class="card-body">
     <form [formGroup]="restaurantForm" (ngSubmit)="onSubmit()">
-      <!-- Restaurant Image Upload -->
       <div class="mb-4 text-center">
         <div class="position-relative d-inline-block">
           <div class="avatar-preview rounded border" 
@@ -99,7 +98,6 @@
           </button>
         </div>
 
-        <!-- Tenant Unit Form -->
         <div class="col-12 mt-3" *ngIf="showInlineUnitForm">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -109,7 +107,6 @@
             <div class="card-body">
               <form [formGroup]="tenantUnitForm" (ngSubmit)="onTenantUnitSubmit()">
                 <div class="row g-3">
-                  <!-- Image Upload -->
                   <div class="col-12 mb-4 text-center">
                     <div class="position-relative d-inline-block">
                       <div class="avatar-preview rounded border" 
@@ -189,35 +186,19 @@
                     <input type="number" step="any" class="form-control" formControlName="altitude" placeholder="Enter altitude">
                   </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label">State*</label>
-                    <select class="form-select" formControlName="state_id">
-                      <option value="">Select State</option>
-                      <!-- Add state options dynamically -->
-                    </select>
-                    <div class="text-danger small" *ngIf="tenantUnitForm.get('state_id')?.touched && tenantUnitForm.get('state_id')?.invalid">
-                      State is required
-                    </div>
-                  </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label">Country*</label>
-                    <select class="form-select" id="country_id" formControlName="country_id" [attr.disabled]="loadingCountries">
-                      <option value="">{{ loadingCountries ? 'Loading countries...' : 'Select Country' }}</option>
-                      <option *ngFor="let country of countries" [value]="country.id">{{ country.name }}</option>
-                    </select>
-                    <div *ngIf="countryError" class="text-danger mt-1">
-                      <small>{{ countryError }}</small>
-                    </div>
-                    <div class="text-danger small" *ngIf="tenantUnitForm.get('country_id')?.touched && tenantUnitForm.get('country_id')?.invalid">
-                      Country is required
-                    </div>
-                  </div>
-
-                  <div class="col-12">
-                    <label class="form-label">Meta Information</label>
-                    <textarea class="form-control" formControlName="meta" placeholder="Enter additional information"></textarea>
-                  </div>
+                  <select
+                  class="form-select"
+                  formControlName="country_id"
+                  (change)="onCountryChange($event)"
+                  >
+                  <option value="">Select Country</option>
+                  <option *ngFor="let country of countries" [value]="country.id">{{ country.name }}</option>
+                  </select>
+                  <select class="form-select" formControlName="state_id">
+                  <option value="">Select State</option>
+                  <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+                  </select>
 
                   <div class="col-12">
                     <div class="form-check me-3 d-inline-block">
@@ -241,240 +222,85 @@
             </div>
           </div>
         </div>
+      </div>
+    </form>
+  </div>
+</div> -->
 
+<div class="card border-0 shadow-sm mb-4" *ngIf="showAddForm">
+  <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <h5 class="card-title mb-0">Restaurant Details</h5>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="restaurantForm" (ngSubmit)="onSubmit()">
+      <!-- Restaurant Image Upload -->
+      <div class="mb-4 text-center">
+        <div class="position-relative d-inline-block">
+          <div class="avatar-preview rounded border" 
+               [style.background-image]="previewUrl ? 'url(' + previewUrl + ')' : 'none'"
+               [style.background-size]="'cover'"
+               style="width: 200px; height: 150px; background-color: #f8f9fa;">
+            <div *ngIf="!previewUrl" class="d-flex align-items-center justify-content-center h-100">
+              <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+            </div>
+          </div>
+          <label class="btn btn-sm btn-primary position-absolute bottom-0 end-0 me-2 mb-2">
+            <i class="bi bi-camera-fill"></i>
+            <input type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)">
+          </label>
+        </div>
+        <small class="d-block text-muted mt-2">Click the camera icon to upload restaurant image</small>
+      </div>
 
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Restaurant Name*</label>
+          <input type="text" class="form-control" formControlName="name" placeholder="Enter restaurant name">
+          <div class="text-danger small" *ngIf="restaurantForm.get('name')?.touched && restaurantForm.get('name')?.invalid">
+            Restaurant name is required
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Website URL*</label>
+          <input type="url" class="form-control" formControlName="website" placeholder="https://example.com">
+          <div class="text-danger small" *ngIf="restaurantForm.get('website')?.touched && restaurantForm.get('website')?.invalid">
+            <span *ngIf="restaurantForm.get('website')?.errors?.['required']">Website URL is required</span>
+            <span *ngIf="restaurantForm.get('website')?.errors?.['pattern']">Enter a valid URL starting with http:// or https://</span>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">GST Number*</label>
+          <input type="text" class="form-control" formControlName="gst" placeholder="Enter GST number">
+          <div class="text-danger small" *ngIf="restaurantForm.get('gst')?.touched && restaurantForm.get('gst')?.invalid">
+            <span *ngIf="restaurantForm.get('gst')?.errors?.['required']">GST number is required</span>
+            <span *ngIf="restaurantForm.get('gst')?.errors?.['minlength']">GST number must be at least 15 characters</span>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="active" formControlName="active">
+            <label class="form-check-label" for="active">Active Status</label>
+          </div>
+        </div>
+
+        <div class="col-12 mb-3">
+          <button type="submit" class="btn btn-primary me-2" [disabled]="restaurantForm.invalid">
+            {{ isEditing ? 'Update Restaurant' : 'Create Restaurant' }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary me-2" (click)="resetForm()">Cancel</button>
+        </div>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Tenant Unit Form Modal -->
-<div class="modal" [class.show]="showTenantUnit" [style.display]="showTenantUnit ? 'block' : 'none'" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Tenant Unit</h5>
-        <button type="button" class="btn-close" (click)="closeTenantUnitForm()"></button>
-      </div>
-      <div class="modal-body">
-        <form [formGroup]="tenantUnitForm" (ngSubmit)="onTenantUnitSubmit()">
-          <div class="row g-3">
-            <!-- Image Upload -->
-            <div class="col-12 mb-4 text-center">
-              <div class="position-relative d-inline-block">
-                <div class="avatar-preview rounded border" 
-                     [style.background-image]="previewUrl ? 'url(' + previewUrl + ')' : 'none'"
-                     [style.background-size]="'cover'"
-                     style="width: 200px; height: 150px; background-color: #f8f9fa;">
-                  <div *ngIf="!previewUrl" class="d-flex align-items-center justify-content-center h-100">
-                    <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
-                  </div>
-                </div>
-                <label class="btn btn-sm btn-primary position-absolute bottom-0 end-0 me-2 mb-2">
-                  <i class="bi bi-camera-fill"></i>
-                  <input type="file" class="d-none" accept="image/*" (change)="onTenantUnitImageSelected($event)">
-                </label>
-              </div>
-            </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Name*</label>
-              <input type="text" class="form-control" formControlName="name" placeholder="Enter unit name">
-              <div class="text-danger small" *ngIf="tenantUnitForm.get('name')?.touched && tenantUnitForm.get('name')?.invalid">
-                Name is required
-              </div>
-            </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Address Line 1*</label>
-              <input type="text" class="form-control" formControlName="line_one" placeholder="Enter address line 1">
-              <div class="text-danger small" *ngIf="tenantUnitForm.get('line_one')?.touched && tenantUnitForm.get('line_one')?.invalid">
-                Address line 1 is required
-              </div>
-            </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Address Line 2</label>
-              <input type="text" class="form-control" formControlName="line_two" placeholder="Enter address line 2">
-            </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Address Line 3</label>
-              <input type="text" class="form-control" formControlName="line_three" placeholder="Enter address line 3">
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Landmark</label>
-              <input type="text" class="form-control" formControlName="landmark" placeholder="Enter landmark">
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">City*</label>
-              <input type="text" class="form-control" formControlName="city" placeholder="Enter city">
-              <div class="text-danger small" *ngIf="tenantUnitForm.get('city')?.touched && tenantUnitForm.get('city')?.invalid">
-                City is required
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Postal Code*</label>
-              <input type="text" class="form-control" formControlName="postal_code" placeholder="Enter postal code">
-              <div class="text-danger small" *ngIf="tenantUnitForm.get('postal_code')?.touched && tenantUnitForm.get('postal_code')?.invalid">
-                Postal code is required
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Latitude</label>
-              <input type="number" step="any" class="form-control" formControlName="lattitude" placeholder="Enter latitude">
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Longitude</label>
-              <input type="number" step="any" class="form-control" formControlName="longitude" placeholder="Enter longitude">
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Altitude</label>
-              <input type="number" step="any" class="form-control" formControlName="altitude" placeholder="Enter altitude">
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">State*</label>
-              <select class="form-select" formControlName="state_id">
-                <option value="">Select State</option>
-                <!-- Add state options dynamically -->
-              </select>
-              <div class="text-danger small" *ngIf="tenantUnitForm.get('state_id')?.touched && tenantUnitForm.get('state_id')?.invalid">
-                State is required
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Country*</label>
-              <select class="form-select" formControlName="country_id">
-                <option value="">Select Country</option>
-                <!-- Add country options dynamically -->
-              </select>
-              <div class="text-danger small" *ngIf="tenantUnitForm.get('country_id')?.touched && tenantUnitForm.get('country_id')?.invalid">
-                Country is required
-              </div>
-            </div>
-
-            <div class="col-12">
-              <label class="form-label">Meta Information</label>
-              <textarea class="form-control" formControlName="meta" placeholder="Enter additional information"></textarea>
-            </div>
-
-            <div class="col-12">
-              <div class="form-check me-3 d-inline-block">
-                <input type="checkbox" class="form-check-input" id="active" formControlName="active">
-                <label class="form-check-label" for="active">Active Status</label>
-              </div>
-              <div class="form-check d-inline-block">
-                <input type="checkbox" class="form-check-input" id="default" formControlName="default">
-                <label class="form-check-label" for="default">Set as Default</label>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeTenantUnitForm()">Close</button>
-        <button type="button" class="btn btn-primary" (click)="onTenantUnitSubmit()" [disabled]="tenantUnitForm.invalid || submittingUnit">
-          {{ submittingUnit ? 'Adding...' : 'Add Unit' }}
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Restaurant Meta Form Modal -->
-<div class="modal" [class.show]="showRestaurantMeta" [style.display]="showRestaurantMeta ? 'block' : 'none'" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Additional Restaurant Details</h5>
-        <button type="button" class="btn-close" (click)="closeRestaurantMetaForm()"></button>
-      </div>
-      <div class="modal-body">
-        <form [formGroup]="restaurantMetaForm" (ngSubmit)="onRestaurantMetaSubmit()">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Contact Email*</label>
-              <input type="email" class="form-control" formControlName="email" placeholder="Enter contact email">
-              <div class="text-danger small" *ngIf="restaurantMetaForm.get('email')?.touched && restaurantMetaForm.get('email')?.invalid">
-                <span *ngIf="restaurantMetaForm.get('email')?.errors?.['required']">Email is required</span>
-                <span *ngIf="restaurantMetaForm.get('email')?.errors?.['email']">Enter a valid email</span>
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Phone Number*</label>
-              <input type="tel" class="form-control" formControlName="phone" placeholder="Enter phone number">
-              <div class="text-danger small" *ngIf="restaurantMetaForm.get('phone')?.touched && restaurantMetaForm.get('phone')?.invalid">
-                Phone number is required
-              </div>
-            </div>
-
-            <div class="col-12">
-              <label class="form-label">Address*</label>
-              <textarea class="form-control" formControlName="address" rows="3" placeholder="Enter complete address"></textarea>
-              <div class="text-danger small" *ngIf="restaurantMetaForm.get('address')?.touched && restaurantMetaForm.get('address')?.invalid">
-                Address is required
-              </div>
-            </div>
-
-            <div class="col-12">
-              <label class="form-label">Restaurant Features</label>
-              <div class="row g-2">
-                <div class="col-md-4" *ngFor="let feature of availableFeatures">
-                  <div class="form-check">
-                    <input type="checkbox" class="form-check-input" [id]="'feature_' + feature.value"
-                           [value]="feature.value" (change)="onFeatureChange($event)">
-                    <label class="form-check-label" [for]="'feature_' + feature.value">{{feature.label}}</label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <label class="form-label">Opening Hours</label>
-              <div class="row g-2" formGroupName="openingHours">
-                <div class="col-md-6" *ngFor="let day of weekDays">
-                  <div class="card">
-                    <div class="card-body p-2">
-                      <h6 class="card-title mb-2">{{day}}</h6>
-                      <div class="row g-2">
-                        <div class="col-6">
-                          <input type="time" class="form-control form-control-sm" [formControlName]="day + '_open'" placeholder="Open">
-                        </div>
-                        <div class="col-6">
-                          <input type="time" class="form-control form-control-sm" [formControlName]="day + '_close'" placeholder="Close">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeRestaurantMetaForm()">Close</button>
-        <button type="button" class="btn btn-primary" (click)="onRestaurantMetaSubmit()" [disabled]="restaurantMetaForm.invalid || submittingMeta">
-          {{ submittingMeta ? 'Saving...' : 'Save Details' }}
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Backdrop -->
-<div class="modal-backdrop fade show" *ngIf="showTenantUnit || showRestaurantMeta"></div>
-
-  <!-- Restaurants Table -->
   <div class="card border-0 shadow-sm" *ngIf="!showAddForm">
     <div class="card-body">
       <!-- Search and Filter -->
@@ -499,8 +325,6 @@
               <th>Website</th>
               <th>Status</th>
               <th>GST</th>
-              <th>Created At</th>
-              <th>Updated At</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -527,13 +351,16 @@
                 </span>
               </td>
               <td><small>{{ restaurant.gst }}</small></td>
-              <td><small class="text-muted">{{ restaurant.created_at | date:'short' }}</small></td>
-              <td><small class="text-muted">{{ restaurant.updated_at | date:'short' }}</small></td>
               <td>
                 <div class="btn-group">
+                  <!-- <button class="btn btn-sm btn-outline-primary" title="Edit" (click)="editRestaurant(restaurant)">
+                    <i class="bi bi-pencil"></i>
+                  </button> -->
+
                   <button class="btn btn-sm btn-outline-primary" title="Edit" (click)="editRestaurant(restaurant)">
                     <i class="bi bi-pencil"></i>
                   </button>
+                  
                   <button class="btn btn-sm btn-outline-danger" title="Delete">
                     <i class="bi bi-trash"></i>
                   </button>
