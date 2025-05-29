@@ -60,7 +60,28 @@ export class EditRestaurantsComponent implements OnInit {
 
   onTenantUnitSubmit(): void {
     if (this.tenantUnitForm.valid && !this.submittingUnit) {
-      // Implementation will be added later
+      this.submittingUnit = true;
+      const formData = {
+        ...this.tenantUnitForm.value,
+        tenant_id: this.restaurantId // Include the restaurant ID
+      };
+      console.log('Submitting tenant unit data:', formData);
+      
+      this.restaurantsService.addTenantUnit(formData).subscribe({
+        next: (response) => {
+          console.log('Tenant unit added successfully:', response);
+          this.submittingUnit = false;
+          this.showInlineUnitForm = false;
+          this.tenantUnitForm.reset();
+          // Reset countries and states
+          this.countries = [];
+          this.states = [];
+        },
+        error: (error) => {
+          console.error('Error adding tenant unit:', error);
+          this.submittingUnit = false;
+        }
+      });
     }
   }
 
