@@ -54,7 +54,6 @@ export class LoginComponent {
           console.log("Login successful:", res);
           localStorage.setItem("token", res.token);
           this.router.navigate(["/home"]);
-          alert("Login successful!");
         },
         error: (err: HttpErrorResponse) => {
           console.log("Login failed");
