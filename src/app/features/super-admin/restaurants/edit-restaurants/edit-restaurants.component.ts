@@ -16,13 +16,13 @@ export class EditRestaurantsComponent implements OnInit {
   restaurantForm: FormGroup;
   submitted = false;
   showError = false;
-  restaurantId: string;
+  restaurantId: string = '';
   previewUrl: string | ArrayBuffer | null = null;
   imageFile: File | null = null;
   isEditing = false;
   showInlineUnitForm = false;
   loadingCountries = false;
-  tenantUnitForm: FormGroup;
+  tenantUnitForm!: FormGroup;
   submittingUnit = false;
   countries: any[] = [];
   states: any[] = [];
@@ -33,24 +33,39 @@ export class EditRestaurantsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) {
+    // Get tenant ID from URL params
+    this.route.params.subscribe(params => {
+      this.restaurantId = params['id'];
+      console.log('Tenant ID from URL:', this.restaurantId);
+      // Initialize tenant unit form with the ID from URL
+      this.initTenantUnitForm();
+    });
     // Initialize main restaurant form
     this.restaurantForm = this.formBuilder.group({
       name: ['', Validators.required],
       address: ['', Validators.required],
       image: [null]
     });
+  }
 
-    // Initialize tenant unit form
+  private initTenantUnitForm(): void {
     this.tenantUnitForm = this.formBuilder.group({
       name: ['', Validators.required],
       line_one: ['', Validators.required],
+      line_two: [''],
+      line_three: [''],
+      landmark: [''],
       city: ['', Validators.required],
-      state_id: ['', Validators.required],
-      country_id: ['', Validators.required],
-      postal_code: ['', Validators.required]
+      postal_code: ['', Validators.required],
+      lattitude: [null],
+      longitude: [null],
+      altitude: [null],
+      country_id: [''],
+      state_id: [''],
+      active: [true],
+      default: [false],
+      tenant_id: [this.restaurantId] // Initialize with ID from URL
     });
-    // Get restaurant ID from route params
-    this.restaurantId = this.route.snapshot.params['id'];
   }
 
   resetForm(): void {
@@ -61,10 +76,9 @@ export class EditRestaurantsComponent implements OnInit {
   onTenantUnitSubmit(): void {
     if (this.tenantUnitForm.valid && !this.submittingUnit) {
       this.submittingUnit = true;
-      const formData = {
-        ...this.tenantUnitForm.value,
-        tenant_id: this.restaurantId // Include the restaurant ID
-      };
+      
+      // Get all form values including the hidden tenant_id
+      const formData = this.tenantUnitForm.value;
       console.log('Submitting tenant unit data:', formData);
       
       this.restaurantsService.addTenantUnit(formData).subscribe({

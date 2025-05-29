@@ -83,6 +83,8 @@
     </div>
     <div class="card-body">
       <form [formGroup]="tenantUnitForm" (ngSubmit)="onTenantUnitSubmit()">
+        <!-- Hidden input for tenant_id -->
+        <input type="hidden" formControlName="tenant_id">
         <div class="row g-3">
   
           <div class="col-12 mb-4 text-center">
