@@ -170,7 +170,7 @@
               <option *ngFor="let country of countries" [value]="country.id">{{ country.name }}</option>
             </select>
           </div>
-  
+          
           <div class="col-md-6">
             <select class="form-select" formControlName="state_id">
               <option value="">Select State</option>
@@ -202,7 +202,7 @@
   
   <!-- Trigger Button -->
   <div class="mt-3">
-    <button type="button" class="btn btn-success" (click)="showInlineUnitForm = true">
+    <button type="button" class="btn btn-success" (click)="showInlineUnitForm = true; loadCountries()">
       <i class="bi bi-plus-circle me-2"></i>Add Tenant Unit
     </button>
   </div>

@@ -21,6 +21,7 @@ export class EditRestaurantsComponent implements OnInit {
   imageFile: File | null = null;
   isEditing = false;
   showInlineUnitForm = false;
+  loadingCountries = false;
   tenantUnitForm: FormGroup;
   submittingUnit = false;
   countries: any[] = [];
@@ -69,6 +70,24 @@ export class EditRestaurantsComponent implements OnInit {
       // Implementation will be added later
     }
   }
+
+  loadCountries(): void {
+    this.loadingCountries = true;
+    this.restaurantsService.getCountries().subscribe({
+      next: (countries: any[]) => {
+        console.log('Countries fetched:', countries);
+        this.countries = countries;
+        this.loadingCountries = false;
+      },
+      error: (error) => {
+        console.error('Error loading countries:', error);
+        this.countries = [];
+        this.loadingCountries = false;
+      }
+    });
+  }
+  
+  
 
   onCountryChange(event: any): void {
     const countryId = event.target.value;
