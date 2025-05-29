@@ -13,17 +13,14 @@ import { Router, RouterModule } from '@angular/router';
         <a routerLink="/home" class="nav-link text-white mb-2" routerLinkActive="active">
           <i class="bi bi-house-door me-2"></i> Dashboard
         </a>
-        <a routerLink="/restaurants" class="nav-link text-white mb-2" routerLinkActive="active">
-          <i class="bi bi-shop me-2"></i> Restaurants
-        </a>
         <a routerLink="/users" class="nav-link text-white mb-2" routerLinkActive="active">
           <i class="bi bi-people me-2"></i> Users
         </a>
+        <a routerLink="/restaurants" class="nav-link text-white mb-2" routerLinkActive="active">
+          <i class="bi bi-shop me-2"></i> Restaurants
+        </a>
         <a routerLink="/roles" class="nav-link text-white mb-2" routerLinkActive="active">
           <i class="bi bi-shield-check me-2"></i> Roles
-        </a>
-        <a routerLink="/settings" class="nav-link text-white mb-2" routerLinkActive="active">
-          <i class="bi bi-gear me-2"></i> Settings
         </a>
       </div>
       <div class="mt-auto">

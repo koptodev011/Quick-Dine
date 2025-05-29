@@ -175,9 +175,8 @@
             <tr>
               <th>Name</th>
               <th>Email</th>
-              <th>Restaurant</th>
-              <th>Status</th>
-              <th>Created Date</th>
+              <th>Phone</th>
+              <th>Role</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -185,23 +184,22 @@
             <tr *ngFor="let user of users">
               <td>
                 <div class="d-flex align-items-center">
-                  <div class="avatar-circle bg-primary bg-opacity-10 text-primary">
+                  <div class="avatar-circle bg-primary bg-opacity-10 text-primary" *ngIf="!user.profilePhoto">
                     {{user.name.charAt(0)}}
                   </div>
+                  <img [src]="user.profilePhoto" class="rounded-circle" width="40" height="40" *ngIf="user.profilePhoto">
                   <div class="ms-3">
                     <h6 class="mb-0">{{user.name}}</h6>
-                    <small class="text-muted">{{user.role}}</small>
                   </div>
                 </div>
               </td>
               <td>{{user.email}}</td>
-              <td>{{user.restaurant}}</td>
+              <td>{{user.phone}}</td>
               <td>
-                <span class="badge" [ngClass]="user.status === 'active' ? 'bg-success' : 'bg-danger'">
-                  {{user.status | titlecase}}
+                <span class="badge" [ngClass]="{'bg-primary': user.roleId === 1, 'bg-success': user.roleId === 2, 'bg-info': user.roleId === 3}">
+                  {{user.roleId === 1 ? 'Super Admin' : user.roleId === 2 ? 'Admin' : 'User'}}
                 </span>
               </td>
-              <td>{{user.createdAt | date:'medium'}}</td>
               <td>
                 <div class="btn-group">
                   <button class="btn btn-sm btn-outline-primary" (click)="editUser(user)">
