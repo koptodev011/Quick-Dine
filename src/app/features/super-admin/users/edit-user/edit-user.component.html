@@ -1,0 +1,130 @@
+<form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+  <!-- Profile Photo Upload -->
+  <div class="mb-4 text-center">
+    <div class="position-relative d-inline-block">
+      <div class="avatar-preview rounded-circle border" 
+           [style.background-image]="previewUrl ? 'url(' + previewUrl + ')' : 'none'"
+           [style.background-size]="'cover'"
+           style="width: 150px; height: 150px; background-color: #f8f9fa;">
+        <div *ngIf="!previewUrl" class="d-flex align-items-center justify-content-center h-100">
+          <i class="bi bi-person text-muted" style="font-size: 3rem;"></i>
+        </div>
+      </div>
+      <label class="btn btn-sm btn-primary position-absolute bottom-0 end-0 me-2 mb-2">
+        <i class="bi bi-camera-fill"></i>
+        <input type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)" formControlName="profilePhoto">
+      </label>
+    </div>
+    <small class="d-block text-muted mt-2">Click the camera icon to upload profile photo</small>
+  </div>
+
+  <!-- Name Field -->
+  <div class="mb-3">
+    <label class="form-label">Full Name</label>
+    <input type="text" class="form-control" formControlName="name" placeholder="Enter full name">
+    <div class="text-danger" *ngIf="userForm.get('name')?.touched && userForm.get('name')?.invalid">
+      Name is required
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-control" formControlName="email" placeholder="Enter email">
+      <div class="text-danger small" *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid">
+        Enter a valid email
+      </div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-control" formControlName="password" placeholder="Enter password">
+      <div class="text-danger" *ngIf="userForm.get('password')?.touched && userForm.get('password')?.invalid">
+        <span *ngIf="userForm.get('password')?.errors?.['required']">Password is required</span>
+        <span *ngIf="userForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</span>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Phone</label>
+      <input type="tel" class="form-control" formControlName="phone" placeholder="Enter phone number">
+      <div class="text-danger" *ngIf="userForm.get('phone')?.touched && userForm.get('phone')?.invalid">
+        Phone number is required
+      </div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Confirm Password</label>
+      <input type="password" class="form-control" formControlName="confirmPassword" placeholder="Confirm your password">
+      <div class="text-danger" *ngIf="userForm.get('confirmPassword')?.touched && (userForm.get('confirmPassword')?.invalid || userForm.errors?.['passwordMismatch'])">
+        <span *ngIf="userForm.get('confirmPassword')?.errors?.['required']">Please confirm your password</span>
+        <span *ngIf="userForm.errors?.['passwordMismatch']">Passwords do not match</span>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Roles</label>
+      <select class="form-select" formControlName="roles" [class.is-invalid]="roleError">
+        <option value="">Select a role</option>
+        <option *ngFor="let role of roles" [value]="role.id">{{role.name}}</option>
+      </select>
+      <div class="text-danger" *ngIf="userForm.get('roles')?.touched && userForm.get('roles')?.invalid">
+        Role is required
+      </div>
+      <div class="text-danger" *ngIf="roleError">
+        {{roleError}}
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive">
+        <label class="form-check-label" for="isActive">Active</label>
+      </div>
+    </div>
+    
+    <!-- Units Section -->
+    <div class="col-12 mt-4">
+      <h5 class="mb-3">Units</h5>
+      <div class="card bg-light">
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Branch</label>
+            <div class="branch-list">
+              <!-- Display existing tenants -->
+              <div *ngFor="let tenant of tenants" class="mb-3">
+                <div class="card">
+                  <div class="card-body">
+                    <h6 class="card-title">{{tenant.name}}</h6>
+                    <div class="small text-muted mb-2">
+                      <div *ngIf="tenant.website">Website: {{tenant.website}}</div>
+                      <div *ngIf="tenant.gst">GST: {{tenant.gst}}</div>
+                      <div>Status: {{tenant.active ? 'Active' : 'Inactive'}}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Add new branches -->
+              <div *ngFor="let branch of branches; let i = index" class="d-flex gap-2 mb-2">
+                <select class="form-select" [(ngModel)]="branch.value" [ngModelOptions]="{standalone: true}" [class.is-invalid]="tenantError">
+                  <option value="">Select a branch</option>
+                  <option *ngFor="let tenant of tenants" [value]="tenant.id">{{tenant.name}}</option>
+                </select>
+                <div class="invalid-feedback" *ngIf="tenantError">
+                  {{tenantError}}
+                </div>
+                <button type="button" class="btn btn-outline-danger" (click)="removeBranch(i)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline-primary mt-2" (click)="addBranch()">
+              <i class="bi bi-plus-lg me-2"></i>{{branches.length === 0 ? 'Add Branch' : 'Add Another Branch'}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary me-2" [disabled]="userForm.invalid">Update User</button>
+      <button type="button" class="btn btn-outline-secondary" (click)="goBack()">Cancel</button>
+    </div>
+  </div>
+</form>
