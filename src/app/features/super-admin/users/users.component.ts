@@ -11,6 +11,7 @@ interface User {
   phone: string;
   profilePhoto: string;
   roleId: number;
+  isActive: boolean;
 }
 
 interface UserResponse {
@@ -36,6 +37,7 @@ interface Tenant {
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
+  Math = Math; // For template usage
   showAddForm = false;
   roles: any[] = [];
   roleError: string = '';
@@ -46,7 +48,45 @@ export class UsersComponent implements OnInit {
   userForm: FormGroup;
   branches: { id: number; value: string }[] = [];
 
+  // Pagination properties
+  currentPage = 1;
+  itemsPerPage = 5;
+  totalPages = 1;
+
+  private _allUsers: User[] = [];
   users: User[] = [];
+
+  // Getter to filter users based on search and status
+  private _filteredUsers: User[] = [];
+
+  get filteredUsers(): User[] {
+    return this._filteredUsers;
+  }
+
+  private filterUsers() {
+    const filtered = this._allUsers.filter(user => {
+      const matchesSearch = this.searchTerm.trim() === '' ||
+        user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        user.phone.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+      const matchesStatus = this.statusFilter === 'all' ||
+        (this.statusFilter === 'active' && user.isActive) ||
+        (this.statusFilter === 'inactive' && !user.isActive);
+
+      return matchesSearch && matchesStatus;
+    });
+
+    this._filteredUsers = filtered;
+    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+    this.updatePagedUsers();
+  }
+
+  private updatePagedUsers() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.users = this._filteredUsers.slice(startIndex, endIndex);
+  }
 
   selectedFile: File | null = null;
   previewUrl: string | null = null;
@@ -131,12 +171,53 @@ export class UsersComponent implements OnInit {
     this.http.get<UserResponse>('http://localhost:3000/api/users/getallusers')
       .subscribe({
         next: (response) => {
-          this.users = response.users;
+          this._allUsers = response.users;
+          this.filterUsers();
         },
         error: (error) => {
           console.error('Error fetching users:', error);
         }
       });
+  }
+
+  updateFilteredUsers() {
+    this.currentPage = 1;
+    this.filterUsers();
+  }
+
+  // Pagination methods
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagedUsers();
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagedUsers();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagedUsers();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  // Watch for changes in search and filter
+  onSearchChange() {
+    this.updateFilteredUsers();
+  }
+
+  onStatusFilterChange() {
+    this.updateFilteredUsers();
   }
 
   onSubmit() {
