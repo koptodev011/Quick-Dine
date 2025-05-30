@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { RolesService } from '../../../core/services/roles.service';
+import { Router } from '@angular/router';
 
 interface User {
   id: number;
@@ -91,7 +92,7 @@ export class UsersComponent implements OnInit {
   selectedFile: File | null = null;
   previewUrl: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private rolesService: RolesService) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private rolesService: RolesService, private router: Router) {
     this.userForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -262,8 +263,7 @@ export class UsersComponent implements OnInit {
   }
 
   editUser(user: any) {
-    // Implement edit functionality
-    console.log('Edit user:', user);
+    this.router.navigate(['/edit-user', user.id]);
   }
 
   deleteUser(user: any) {
