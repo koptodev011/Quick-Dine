@@ -22,6 +22,9 @@ import { Router, RouterModule } from '@angular/router';
         <a routerLink="/roles" class="nav-link text-white mb-2" routerLinkActive="active">
           <i class="bi bi-shield-check me-2"></i> Roles
         </a>
+        <a routerLink="/roles" class="nav-link text-white mb-2" routerLinkActive="active">
+          <i class="bi bi-key me-2"></i> Permissions
+        </a>
       </div>
       <div class="mt-auto">
         <button class="btn btn-outline-light w-100" (click)="logout()">

@@ -79,23 +79,18 @@
               <span *ngIf="userForm.errors?.['passwordMismatch']">Passwords do not match</span>
             </div>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Restaurant Name</label>
-            <input type="text" class="form-control" formControlName="restaurant" placeholder="Enter restaurant name">
-            <div class="text-danger small" *ngIf="userForm.get('restaurant')?.touched && userForm.get('restaurant')?.invalid">
-              Restaurant name is required
-            </div>
-          </div>
+
           <div class="col-md-6">
             <label class="form-label">Roles</label>
-            <select class="form-select" formControlName="roles">
+            <select class="form-select" formControlName="roles" [class.is-invalid]="roleError">
               <option value="">Select a role</option>
-              <option value="admin">Admin</option>
-              <option value="manager">Manager</option>
-              <option value="staff">Staff</option>
+              <option *ngFor="let role of roles" [value]="role.id">{{role.name}}</option>
             </select>
             <div class="text-danger" *ngIf="userForm.get('roles')?.touched && userForm.get('roles')?.invalid">
               Role is required
+            </div>
+            <div class="text-danger" *ngIf="roleError">
+              {{roleError}}
             </div>
           </div>
           <div class="col-12">
@@ -114,12 +109,13 @@
                   <label class="form-label">Branch</label>
                   <div class="branch-list">
                     <div *ngFor="let branch of branches; let i = index" class="d-flex gap-2 mb-2">
-                      <select class="form-select" [(ngModel)]="branch.value" [ngModelOptions]="{standalone: true}">
+                      <select class="form-select" [(ngModel)]="branch.value" [ngModelOptions]="{standalone: true}" [class.is-invalid]="tenantError">
                         <option value="">Select a branch</option>
-                        <option value="branch1">Branch 1</option>
-                        <option value="branch2">Branch 2</option>
-                        <option value="branch3">Branch 3</option>
+                        <option *ngFor="let tenant of tenants" [value]="tenant.id">{{tenant.name}}</option>
                       </select>
+                      <div class="invalid-feedback" *ngIf="tenantError">
+                        {{tenantError}}
+                      </div>
                       <button type="button" class="btn btn-outline-danger" (click)="removeBranch(i)">
                         <i class="bi bi-trash"></i>
                       </button>
