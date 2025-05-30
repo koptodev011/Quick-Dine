@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { RolesService } from '../../../core/services/roles.service';
 
 interface User {
   id: number;
@@ -17,6 +18,16 @@ interface UserResponse {
   users: User[];
 }
 
+interface Tenant {
+  id: number;
+  name: string;
+  website: string | null;
+  gst: string;
+  image: string;
+  created_at: string;
+  updated_at: string;
+}
+
 @Component({
   selector: 'app-users',
   standalone: true,
@@ -26,6 +37,10 @@ interface UserResponse {
 })
 export class UsersComponent implements OnInit {
   showAddForm = false;
+  roles: any[] = [];
+  roleError: string = '';
+  tenants: Tenant[] = [];
+  tenantError: string = '';
   searchTerm = '';
   statusFilter = 'all';
   userForm: FormGroup;
@@ -36,17 +51,16 @@ export class UsersComponent implements OnInit {
   selectedFile: File | null = null;
   previewUrl: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private rolesService: RolesService) {
     this.userForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', Validators.required], // Removed minLength since API accepts 'aj'
       confirmPassword: ['', Validators.required],
       roles: ['', Validators.required],
       profilePhoto: [''],
       isActive: [true],
-      branches: this.fb.array([]),
     }, {
       validators: this.passwordMatchValidator
     });
@@ -78,6 +92,39 @@ export class UsersComponent implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
+    this.loadRoles();
+    this.loadTenants();
+  }
+
+  loadTenants() {
+    this.http.get<{success: boolean; message: string; data: Tenant[]}>('http://localhost:3000/api/getalltenants')
+      .subscribe({
+        next: (response) => {
+          console.log('Tenants loaded:', response);
+          this.tenants = response.data;
+          this.tenantError = '';
+        },
+        error: (error) => {
+          console.error('Error loading tenants:', error);
+          this.tenantError = 'Failed to load branches';
+          this.tenants = [];
+        }
+      });
+  }
+
+  loadRoles() {
+    this.rolesService.getRoles().subscribe({
+      next: (roles) => {
+        console.log('Roles loaded:', roles);
+        this.roles = roles;
+        this.roleError = '';
+      },
+      error: (error) => {
+        console.error('Error loading roles:', error);
+        this.roleError = 'Failed to load roles';
+        this.roles = [];
+      }
+    });
   }
 
   loadUsers() {
@@ -94,14 +141,42 @@ export class UsersComponent implements OnInit {
 
   onSubmit() {
     if (this.userForm.valid) {
-      const formData = this.userForm.value;
-      delete formData.confirmPassword;
+      const formData = new FormData();
       
-      // TODO: Implement API call to create user
-      this.userForm.reset();
-      this.branches = [];
-      this.showAddForm = false;
-      this.loadUsers(); // Reload users after submission
+      // Append form fields
+      formData.append('name', this.userForm.get('name')?.value);
+      formData.append('email', this.userForm.get('email')?.value);
+      formData.append('phone', this.userForm.get('phone')?.value);
+      formData.append('password', this.userForm.get('password')?.value);
+      
+      // Append tenant IDs for branches
+      this.branches.forEach((branch, index) => {
+        if (branch.value) {
+          formData.append(`tenant_id${index}`, branch.value);
+        }
+      });
+
+      // Append profile photo if selected
+      if (this.selectedFile) {
+        formData.append('image', this.selectedFile);
+      }
+
+      // Make API call
+      this.http.post('http://localhost:3000/api/users/register', formData)
+        .subscribe({
+          next: (response: any) => {
+            console.log('User registered successfully:', response);
+            this.userForm.reset();
+            this.branches = [];
+            this.showAddForm = false;
+            this.selectedFile = null;
+            this.previewUrl = null;
+            this.loadUsers(); // Reload users after submission
+          },
+          error: (error) => {
+            console.error('Error registering user:', error);
+          }
+        });
     }
   }
 
@@ -123,6 +198,7 @@ export class UsersComponent implements OnInit {
       const newId = this.branches[this.branches.length - 1].id + 1;
       this.branches.push({ id: newId, value: '' });
     }
+    console.log('Current branches:', this.branches);
   }
 
   removeBranch(index: number) {
