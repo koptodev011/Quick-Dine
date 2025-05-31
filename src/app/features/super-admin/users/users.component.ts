@@ -138,7 +138,7 @@ export class UsersComponent implements OnInit {
   }
 
   loadTenants() {
-    this.http.get<{success: boolean; message: string; data: Tenant[]}>('http://localhost:3000/api/getalltenants')
+    this.http.get<{success: boolean; message: string; data: Tenant[]}>('http://localhost:3000/api/tenants/getalltenants')
       .subscribe({
         next: (response) => {
           console.log('Tenants loaded:', response);
